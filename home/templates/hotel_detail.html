@@ -1,62 +1,180 @@
-<!--home/templates/hotel_detail.html-->
 {% extends "utils/base.html" %}
 
 {% block start %}
-<div class="container">
+<div class="container mt-5 pt-3 mb-5 fade-up-element">
+    
+    <!-- Title Section -->
+    <div class="d-flex justify-content-between align-items-start mb-4">
+        <div>
+            <h1 class="fw-bold mb-2">{{hotel.hotel_name}}</h1>
+            <div class="d-flex align-items-center text-muted">
+                <i class="fa-solid fa-star text-warning me-1"></i>
+                <span class="fw-bold text-dark me-2">4.95</span>
+                <span class="text-decoration-underline me-3">124 reviews</span>
+                <i class="fa-solid fa-location-dot me-1 text-danger"></i>
+                <span class="text-decoration-underline">{{hotel.hotel_location}}</span>
+            </div>
+        </div>
+        <div class="d-flex gap-3 mt-2">
+            <button class="btn btn-light rounded-pill border shadow-sm px-3 py-2"><i class="fa-solid fa-arrow-up-from-bracket me-2"></i>Share</button>
+            <button class="btn btn-light rounded-pill border shadow-sm px-3 py-2"><i class="fa-regular fa-heart me-2"></i>Save</button>
+        </div>
+    </div>
 
-
-<div class="card-body mt-5">
-    <h5 class="card-title">{{hotel.hotel_name}}</h5>
-
-      Price <span class="badge text-bg-danger">{{hotel.hotel_price}}</span>
-      Offer Price <span class="badge text-bg-success">{{hotel.hotel_offer_price}}</span>
-<hr>
-    <p>{{hotel.hotel_location}}</p>
-    <span class="badge text-bg-primary">Swimming Pool</span>
-    <span class="badge text-bg-primary">AC</span>
-
-    <p class="mt-5">{{hotel.hotel_description|safe}}</p>
+    <!-- Masonry Image Gallery -->
+    <div class="gallery-grid mb-5">
+        {% if hotel.hotel_images.all|length > 0 %}
+            <!-- Hero Image -->
+            <div class="gallery-main overflow-hidden">
+                <img src="/media/{{hotel.hotel_images.first.images}}" alt="{{hotel.hotel_name}}" onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1566073771259-6a8506099945?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80';">
+            </div>
+            
+            <!-- Other Images (fallback to placeholders if hotel doesn't have 5 images) -->
+            <div class="overflow-hidden">
+                <img src="https://images.unsplash.com/photo-1590490360182-c33d57733427?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Room detail">
+            </div>
+            <div class="overflow-hidden">
+                <img src="https://images.unsplash.com/photo-1571003123894-1f0594d2b5d9?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Pool detail">
+            </div>
+            <div class="overflow-hidden">
+                <img src="https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Interior">
+            </div>
+            <div class="overflow-hidden">
+                <img src="https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="View">
+            </div>
+        {% else %}
+            <!-- Default Placeholder Gallery -->
+            <div class="gallery-main overflow-hidden">
+                <img src="https://images.unsplash.com/photo-1566073771259-6a8506099945?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80" alt="Placeholder Hero">
+            </div>
+            <div class="overflow-hidden"><img src="https://images.unsplash.com/photo-1590490360182-c33d57733427?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"></div>
+            <div class="overflow-hidden"><img src="https://images.unsplash.com/photo-1571003123894-1f0594d2b5d9?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"></div>
+            <div class="overflow-hidden"><img src="https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"></div>
+            <div class="overflow-hidden"><img src="https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"></div>
+        {% endif %}
+    </div>
 
     <div class="row">
-        {% for image in hotel.hotel_images.all %}
+        <!-- Left Column: Details -->
+        <div class="col-lg-8 pe-lg-5">
+            <h3 class="fw-bold mb-1">Entire luxury suite hosted by Aura Stays</h3>
+            <p class="text-muted mb-4">4 guests · 2 bedrooms · 2 beds · 2 baths</p>
+            
+            <hr class="mb-4 opacity-25">
 
-        <div class="col-2">
-            <img src="/media/{{image.image}}" style="height: 150px ;">
+            <!-- Description -->
+            <div class="mb-5">
+                <h4 class="fw-bold mb-3">About this space</h4>
+                <div class="text-muted" style="line-height: 1.8;">
+                    {{hotel.hotel_description|safe}}
+                </div>
+            </div>
 
+            <hr class="mb-4 opacity-25">
+
+            <!-- Amenities -->
+            <div class="mb-5">
+                <h4 class="fw-bold mb-4">What this place offers</h4>
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="amenity-item">
+                            <i class="fa-solid fa-water"></i>
+                            <span class="fs-6">Swimming Pool</span>
+                        </div>
+                        <div class="amenity-item">
+                            <i class="fa-solid fa-wifi"></i>
+                            <span class="fs-6">Fast Wifi</span>
+                        </div>
+                        <div class="amenity-item">
+                            <i class="fa-solid fa-square-parking"></i>
+                            <span class="fs-6">Free parking on premises</span>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="amenity-item">
+                            <i class="fa-solid fa-snowflake"></i>
+                            <span class="fs-6">Air conditioning</span>
+                        </div>
+                        <div class="amenity-item">
+                            <i class="fa-solid fa-tv"></i>
+                            <span class="fs-6">TV with Netflix</span>
+                        </div>
+                        <div class="amenity-item">
+                            <i class="fa-solid fa-kitchen-set"></i>
+                            <span class="fs-6">Kitchen</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
 
-        {% endfor %}
+        <!-- Right Column: Sticky Booking Card -->
+        <div class="col-lg-4">
+            <div class="sticky-booking-card">
+                <div class="d-flex align-items-end mb-4">
+                    <h2 class="fw-bold mb-0 me-2">₹{{hotel.hotel_offer_price}}</h2>
+                    <span class="text-muted">night</span>
+                    {% if hotel.hotel_price != hotel.hotel_offer_price %}
+                        <span class="text-decoration-line-through text-muted ms-auto fs-5">₹{{hotel.hotel_price}}</span>
+                    {% endif %}
+                </div>
 
+                {% if request.user.is_authenticated %}
+                    <form method="POST">
+                        {% csrf_token %}
+                        {% include "utils/alerts.html" %}
+                        
+                        <div class="border rounded-4 mb-3 overflow-hidden">
+                            <div class="d-flex">
+                                <div class="w-50 p-3 border-end border-bottom">
+                                    <label class="form-label text-uppercase fw-bold text-muted" style="font-size: 0.7rem;">Check-In</label>
+                                    <input type="date" name="start_date" class="form-control border-0 p-0 shadow-none fw-medium" required>
+                                </div>
+                                <div class="w-50 p-3 border-bottom">
+                                    <label class="form-label text-uppercase fw-bold text-muted" style="font-size: 0.7rem;">Check-Out</label>
+                                    <input type="date" name="end_date" class="form-control border-0 p-0 shadow-none fw-medium" required>
+                                </div>
+                            </div>
+                            <div class="p-3">
+                                <label class="form-label text-uppercase fw-bold text-muted" style="font-size: 0.7rem;">Guests</label>
+                                <select class="form-select border-0 p-0 shadow-none fw-medium">
+                                    <option>1 guest</option>
+                                    <option>2 guests</option>
+                                    <option>3 guests</option>
+                                    <option>4 guests</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary-custom w-100 py-3 fs-5 mt-2">Reserve</button>
+                        <p class="text-center text-muted small mt-3">You won't be charged yet</p>
+                    </form>
+                {% else %}
+                    <div class="text-center py-4">
+                        <i class="fa-solid fa-lock text-muted fa-2x mb-3"></i>
+                        <h5 class="fw-bold">Login to Reserve</h5>
+                        <p class="text-muted small">Please login to your account to book this amazing stay.</p>
+                        <a href="{% url 'login_page' %}" class="btn btn-primary-custom w-100 py-3 mt-3">Login</a>
+                    </div>
+                {% endif %}
+                
+                <hr class="my-4 opacity-25">
+                
+                <div class="d-flex justify-content-between mb-2">
+                    <span class="text-decoration-underline">₹{{hotel.hotel_offer_price}} x 1 night</span>
+                    <span>₹{{hotel.hotel_offer_price}}</span>
+                </div>
+                <div class="d-flex justify-content-between mb-3">
+                    <span class="text-decoration-underline">Service fee</span>
+                    <span>₹0</span>
+                </div>
+                <hr class="mb-3 opacity-25">
+                <div class="d-flex justify-content-between fw-bold fs-5">
+                    <span>Total</span>
+                    <span>₹{{hotel.hotel_offer_price}}</span>
+                </div>
+            </div>
         </div>
-
-        {% if request.user.is_authenticated %}
-
-        <form method ="POST">
-            {% csrf_token %}
-        {% include "utils/alerts.html" %}
-
-            <div class="mb-3">
-                <label for="exampleInputEmail1" class="form-label">Start Date</label>
-                <input type="date" name="start_date" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp">
-
-              </div>
-
-              <div class="mb-3">
-                <label for="exampleInputEmail1" class="form-label">End Date</label>
-                <input type="date" name="end_date" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp">
-
-              </div>
-
-            <button type="submit" class="btn btn-danger mt-5">Book now</button>
-        </form>
-     {% else %}
-
-     <a href="{% url 'login_page' %}" class="btn btn-success">Login</a>
-     {% endif %}
-
-  </div>
+    </div>
 </div>
-
-
-
 {% endblock %}

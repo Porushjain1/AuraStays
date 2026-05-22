@@ -1,72 +1,135 @@
-<!--add_hotel.html-->
 {% extends "utils/vendor_base.html" %}
 
 {% block start %}
+<div class="d-flex justify-content-between align-items-center mb-5">
+    <div>
+        <h2 class="fw-bold mb-1">Add New Property</h2>
+        <p class="text-muted mb-0">List a new hotel or suite on Aura Stays.</p>
+    </div>
+    <div>
+        <a href="{% url 'vendor_hotels' %}" class="btn btn-outline-secondary rounded-pill px-4">Cancel</a>
+    </div>
+</div>
 
-<div class="container mt-5 pt-5 pb-5">
-
-  <div class="col-6 mx-auto card shadow p-4" style="border:none">
-    <h2>Add Hotel</h2>
-      <form method="POST">
-        {% include "utils/alerts.html" %}
+<div class="row">
+    <div class="col-lg-8">
+        <form method="POST" class="metric-card">
+            {% include "utils/alerts.html" %}
             {% csrf_token %}
-        
-    
+            
+            <h5 class="fw-bold mb-4 border-bottom pb-3">Basic Information</h5>
+            
+            <div class="mb-4">
+                <label class="form-label text-muted small text-uppercase fw-bold">Property Name</label>
+                <input type="text" name="hotel_name" class="form-control form-control-lg bg-light border-0 shadow-none" placeholder="e.g. Oceanview Luxury Villa" required>
+            </div>
 
-          <div class="mb-3">
-            <label for="exampleInputEmail1" class="form-label">Hotel Name</label>
-            <input id="email" type="text" name="hotel_name" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp">
+            <div class="mb-4">
+                <label class="form-label text-muted small text-uppercase fw-bold">Location</label>
+                <input type="text" name="hotel_location" class="form-control form-control-lg bg-light border-0 shadow-none" placeholder="e.g. Goa, India" required>
+            </div>
 
-          </div>
+            <div class="mb-4">
+                <label class="form-label text-muted small text-uppercase fw-bold">Description</label>
+                <textarea name="hotel_description" id="flora" class="form-control bg-light border-0 shadow-none" rows="5" placeholder="Describe what makes your property unique..." required></textarea>
+            </div>
 
-          <div class="mb-3">
-            <label for="floatingTextarea">Hotel Description</label>
-            <div class="form-floating">
+            <h5 class="fw-bold mb-4 mt-5 border-bottom pb-3">Pricing & Amenities</h5>
+
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    <label class="form-label text-muted small text-uppercase fw-bold">Standard Price (₹)</label>
+                    <input type="number" name="hotel_price" class="form-control form-control-lg bg-light border-0 shadow-none" placeholder="0.00" required>
+                </div>
+                <div class="col-md-6 mt-4 mt-md-0">
+                    <label class="form-label text-muted small text-uppercase fw-bold">Offer Price (₹)</label>
+                    <input type="number" name="hotel_offer_price" class="form-control form-control-lg bg-light border-0 shadow-none" placeholder="0.00" required>
+                </div>
+            </div>
+
+            <div class="mb-5">
+                <label class="form-label text-muted small text-uppercase fw-bold">Select Amenities</label>
                 
-                <textarea name="hotel_description" id="flora" class="form-control" 
-                placeholder="Leave a comment here" ></textarea>
-              </div> </div>
+                <!-- Search Input -->
+                <input type="text" id="amenitySearch" class="form-control form-control-lg bg-light border-0 shadow-none amenities-search mb-3" placeholder="Search amenities... (e.g., Wifi, Pool)">
+                
+                <!-- Hidden inputs for backend compatibility -->
+                <div id="hiddenAmenities">
+                    <!-- Checkboxes will be dynamically added here to submit with the form -->
+                </div>
 
-          <div class="mb-3">
-                <label for="exampleInputEmail1" class="form-label">Hotel ameneties</label>
-
-              <select name="ameneties" class="form-select form-select-sm" multiple aria-label="Small select example">
-                {% for amenetie in ameneties %}
-
-                <option value="{{amenetie.id}}">{{amenetie.name}}</option>
-
-                {% endfor %}
-              </select>
-              </div>
-
-
-
-
-
-              <div class="mb-3">
-                <label for="exampleInputEmail1" class="form-label">Hotel Price</label>
-                <input id="email" type="number" name="hotel_price" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp">
-
-              </div>
-
-
-
-              <div class="mb-3">
-                <label for="exampleInputEmail1" class="form-label">Hotel Offer Price</label>
-                <input id="email" type="number" name="hotel_offer_price" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp">
-
-              </div>
-
-              <div class="mb-3">
-                <label for="exampleInputEmail1" class="form-label">Hotel Location</label>
-                <input id="email" type="text" name="hotel_location" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp">
-
-              </div>
-          <button type="submit" class="btn btn-primary">Submit</button>
-
+                <!-- Interactive Chips Container -->
+                <div class="amenities-container shadow-inner" id="amenitiesList">
+                    {% for amenetie in ameneties %}
+                    <div class="amenity-chip" data-id="{{amenetie.id}}" data-name="{{amenetie.name|lower}}" onclick="toggleAmenity(this, '{{amenetie.id}}')">
+                        <i class="fa-solid fa-check-circle check-icon text-white"></i>
+                        <span>{{amenetie.name}}</span>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            
+            <button type="submit" class="btn btn-primary-custom w-100 py-3 fs-5"><i class="fa-solid fa-check-circle me-2"></i>Create Property</button>
         </form>
-  </div>
-  </div>
+    </div>
+    
+    <div class="col-lg-4 mt-4 mt-lg-0">
+        <div class="metric-card bg-primary bg-opacity-10 text-primary h-100">
+            <h5 class="fw-bold mb-3"><i class="fa-regular fa-lightbulb me-2"></i>Host Tips</h5>
+            <ul class="list-unstyled">
+                <li class="mb-3"><strong>Be descriptive:</strong> Properties with detailed descriptions get 40% more bookings.</li>
+                <li class="mb-3"><strong>Competitive pricing:</strong> Set your offer price 10-15% lower than the standard price to attract deals.</li>
+                <li><strong>Images:</strong> Once your property is created, you will be prompted to upload high-quality images. Properties with 5+ images perform the best!</li>
+            </ul>
+        </div>
+    </div>
+</div>
 
+<!-- Amenities Interaction Script -->
+<script>
+    function toggleAmenity(chipElement, amenityId) {
+        // Toggle visual selected state
+        chipElement.classList.toggle('selected');
+        
+        const hiddenContainer = document.getElementById('hiddenAmenities');
+        const checkboxId = 'chk_amenity_' + amenityId;
+        let checkbox = document.getElementById(checkboxId);
+        
+        if (chipElement.classList.contains('selected')) {
+            // Create a hidden checkbox if it doesn't exist to submit to Django backend
+            if (!checkbox) {
+                checkbox = document.createElement('input');
+                checkbox.type = 'checkbox';
+                checkbox.name = 'ameneties';
+                checkbox.value = amenityId;
+                checkbox.id = checkboxId;
+                checkbox.checked = true;
+                checkbox.style.display = 'none';
+                hiddenContainer.appendChild(checkbox);
+            } else {
+                checkbox.checked = true;
+            }
+        } else {
+            // Uncheck the hidden checkbox if it exists
+            if (checkbox) {
+                checkbox.checked = false;
+            }
+        }
+    }
 
+    // Interactive Search Filtering
+    document.getElementById('amenitySearch').addEventListener('input', function(e) {
+        const searchTerm = e.target.value.toLowerCase();
+        const chips = document.querySelectorAll('.amenity-chip');
+        
+        chips.forEach(chip => {
+            const name = chip.getAttribute('data-name');
+            if (name.includes(searchTerm)) {
+                chip.style.display = 'inline-flex';
+            } else {
+                chip.style.display = 'none';
+            }
+        });
+    });
+</script>
 {% endblock %}

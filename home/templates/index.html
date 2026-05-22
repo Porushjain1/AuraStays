@@ -1,47 +1,82 @@
 {% extends "utils/base.html" %}
 {% block start %}
-<div class="container mt-5 pt-5 pb-5">
-  <div class="col-6 mx-auto">
-    <form class="d-flex">
-      <input type="text" name="search" class="form-control" placeholder="Search">
-      <select class="form-control" name="sort_by">
-        <option value="">Choose</option>
-        <option  value="sort_low">Sort by Low to high</option>
-        <option  value="sort_high">Sort by high to Low</option>
 
-
-      </select>
-      <button type="submit" class="btn btn-warning mt-1">Search</button>
-    </form>
+<!-- Hero Section -->
+<div class="container mt-4">
+  <div class="hero-section text-center position-relative overflow-hidden" style="background: linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.6)), url('https://images.unsplash.com/photo-1571003123894-1f0594d2b5d9?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80') center/cover no-repeat;">
+    <div class="position-relative" style="z-index: 2;">
+      <h1 class="hero-title">Find Your Next Stay</h1>
+      <p class="hero-subtitle">Search low prices on hotels, homes and much more...</p>
+      
+      <div class="col-lg-10 col-md-12 mx-auto">
+        <form class="search-box d-flex flex-column flex-md-row align-items-center w-100 p-2" method="GET" id="search-form">
+          <div class="flex-grow-1 w-100 px-3 border-end-md d-flex align-items-center">
+            <i class="fa-solid fa-location-dot text-muted me-2"></i>
+            <input type="text" name="search" class="form-control border-0 bg-transparent shadow-none" placeholder="Where are you going?" value="{{ request.GET.search }}">
+          </div>
+          <div class="w-100 px-3 border-end-md mt-3 mt-md-0 d-flex align-items-center">
+            <i class="fa-regular fa-calendar-check text-muted me-2"></i>
+            <input type="text" name="checkin" id="checkin" class="form-control border-0 bg-transparent shadow-none" placeholder="Check-in" onfocus="(this.type='date')" onblur="(this.type='text')" value="{{ request.GET.checkin }}">
+          </div>
+          <div class="w-100 px-3 border-end-md mt-3 mt-md-0 d-flex align-items-center">
+            <i class="fa-regular fa-calendar-xmark text-muted me-2"></i>
+            <input type="text" name="checkout" id="checkout" class="form-control border-0 bg-transparent shadow-none" placeholder="Check-out" onfocus="(this.type='date')" onblur="(this.type='text')" value="{{ request.GET.checkout }}">
+          </div>
+          <div class="px-3 w-100 mt-3 mt-md-0">
+            <select class="form-select border-0 text-muted bg-transparent shadow-none" name="sort_by">
+              <option value="">Sort By Price</option>
+              <option value="sort_low" {% if request.GET.sort_by == 'sort_low' %}selected{% endif %}>Low to High</option>
+              <option value="sort_high" {% if request.GET.sort_by == 'sort_high' %}selected{% endif %}>High to Low</option>
+            </select>
+          </div>
+          <button type="submit" class="btn btn-search w-100 w-md-auto mt-3 mt-md-0 px-4 py-2">Search</button>
+        </form>
+      </div>
+    </div>
   </div>
-    <div class="row">
-      {% for hotel in hotels %}
-        <div class="col-md-3 mt-3">
-            <div class="card shadow" style="width: 18rem;">
-         
-              <a href="{% url 'hotel_details' hotel.hotel_slug %}">
-              {% if hotel.hotel_images.first %}
-              <img src="/media/{{hotel.hotel_images.first.image}}" class="card-img-top" alt="...">
-               {% else %}
+</div>
 
-               <img src="https://t4.ftcdn.net/jpg/04/70/29/97/360_F_470299797_UD0eoVMMSUbHCcNJCdv2t8B2g1GVqYgs.jpg" class="card-img-top" alt="...">
-{% endif %}
-              <div class="card-body">
-                  <h5 class="card-title">{{hotel.hotel_name}}</h5>
-
-                    Price <span class="badge text-bg-danger">{{hotel.hotel_price}}</span>
-                    Offer Price <span class="badge text-bg-success">{{hotel.hotel_offer_price}}</span>
-<hr>
-                  <p>{{hotel.hotel_location}}</p>
-                  <span class="badge text-bg-primary">Swimming Pool</span>
-                  <span class="badge text-bg-primary">AC</span>
-
-                </div>
-                </a>
-              </div>
+<!-- Trending Destinations Section -->
+<div class="container mt-5 mb-5">
+  <div class="d-flex justify-content-between align-items-end mb-4">
+    <h3 class="fw-bold mb-0">Trending Destinations <span class="badge bg-danger rounded-pill fs-6 align-middle ms-2" style="animation: pulse 2s infinite;"><i class="fa-solid fa-fire"></i> Hot</span></h3>
+  </div>
+  
+  <div class="row g-3">
+    {% for dest in destinations %}
+    <div class="col-md-4 fade-up-element">
+      <div class="position-relative overflow-hidden rounded-4 shadow-sm" style="height: 250px; cursor: pointer;" onclick="fetchHotels('/?search={{ dest.name }}')">
+        <img src="{{ dest.image }}" class="w-100 h-100 object-fit-cover" style="transition: transform 0.5s ease;" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'" alt="{{ dest.name }}">
+        <div class="position-absolute bottom-0 start-0 w-100 p-4" style="background: linear-gradient(to top, rgba(0,0,0,0.8), transparent);">
+          <h4 class="text-white fw-bold mb-1">{{ dest.name }}</h4>
+          <p class="text-white-50 mb-0"><i class="fa-solid fa-hotel me-1"></i> {{ dest.count }} Properties</p>
         </div>
-      {% endfor %}
-       </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+
+<style>
+@keyframes pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+  100% { transform: scale(1); }
+}
+</style>
+
+<!-- Hotel Listings -->
+<div class="container mb-5 pb-5">
+  <h3 class="mb-4 fw-bold">
+    {% if request.GET.search %}
+      Showing {{ hotels|length }} hotels for "{{ request.GET.search }}"
+    {% else %}
+      Explore Aura Properties
+    {% endif %}
+  </h3>
+  <div class="row g-4" id="hotel-grid">
+    {% include "hotel_list_partial.html" %}
+  </div>
 </div>
 
 {% endblock %}

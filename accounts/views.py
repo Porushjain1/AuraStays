@@ -1,5 +1,5 @@
 from django.shortcuts import render, redirect
-from .models import HotelUser, HotelVendor, Hotel, Ameneties, HotelImages
+from .models import HotelUser, HotelVendor, Hotel, Ameneties, HotelImages, HotelBooking
 from django.db.models import Q
 from django.contrib import messages
 from .utils import generateRandomToken, sendEmailToken, sendOTPtoEmail, generateSlug
@@ -35,7 +35,7 @@ def login_page(request):
         if hotel_user:
             messages.success(request, "Login Success")
             login(request, hotel_user)
-            return redirect('/accounts/login/')
+            return redirect('/')
         
         messages.warning(request, "Invalid Credentials")
         return redirect('/accounts/login/')
@@ -52,15 +52,13 @@ def register(request):
         phone_number = request.POST.get('phone_number')
 
 
-        hotel_user = HotelUser.objects.filter(
-            Q(email = email) | Q(phone_number = phone_number)
-        )
-
-        if hotel_user.exists():
-            messages.warning(request, "Account already exists")
-            return redirect('/accounts/register')
-        
-
+        if HotelUser.objects.filter(email=email).exists():
+            messages.warning(request, "Email is already registered")
+            return redirect('/accounts/register/')
+            
+        if HotelUser.objects.filter(phone_number=phone_number).exists():
+            messages.warning(request, "Phone number is already registered")
+            return redirect('/accounts/register/')
 
         hotel_user = HotelUser.objects.create(
             username = phone_number,
@@ -78,51 +76,85 @@ def register(request):
 
         sendEmailToken(email , hotel_user.email_token)
 
-        messages.success(request, "Email send to your email")
-        return redirect('/accounts/login')
+        login(request, hotel_user)
+        messages.success(request, "Account created! Welcome to Aura Stays.")
+        return redirect('/')
         
     return render(request, 'register.html')
 
 
 def verify_email_token(request, token):
     try:
-        hotel_user = HotelUser.objects.get(email_token = token)
+        is_vendor = False
+        hotel_user = HotelUser.objects.filter(email_token=token).first()
+        
+        if not hotel_user:
+            hotel_user = HotelVendor.objects.filter(email_token=token).first()
+            is_vendor = True
+            
+        if not hotel_user:
+            return HttpResponse("Invalid Token")
+
         hotel_user.is_verified = True
         hotel_user.save()
         messages.success(request, "Email Verified")
+        
+        if is_vendor:
+            return redirect('/accounts/login-vendor/')
         return redirect('/accounts/login/')
     except Exception as e:
         return HttpResponse("Invalid Token")
-
-
 def send_otp(request, email):
-    hotel_user = HotelUser.objects.filter(email = email)
-    if not hotel_user.exists():
+    login_type = request.GET.get('type')
+    
+    if login_type == 'vendor':
+        user_qs = HotelVendor.objects.filter(email=email)
+        if not user_qs.exists():
+            messages.warning(request, "No Vendor Account Found.")
+            return redirect('/accounts/login-vendor/')
+    else:
+        user_qs = HotelUser.objects.filter(email=email)
+        if not user_qs.exists():
             messages.warning(request, "No Account Found.")
             return redirect('/accounts/login/')
 
-    otp =  random.randint(1000 , 9999)
-    hotel_user.update(otp =otp)
+    otp = random.randint(1000 , 9999)
+    user_qs.update(otp=otp)
 
     sendOTPtoEmail(email , otp)
 
+    if login_type == 'vendor':
+        return redirect(f'/accounts/verify-otp/{email}/?type=vendor')
     return redirect(f'/accounts/verify-otp/{email}/')
 
 
 def verify_otp(request , email):
+    login_type = request.GET.get('type')
+    
     if request.method == "POST":
-        otp  = request.POST.get('otp')
-        hotel_user = HotelUser.objects.get(email = email)
+        otp = request.POST.get('otp')
+        
+        if login_type == 'vendor':
+            hotel_user = HotelVendor.objects.filter(email=email).first()
+            is_vendor = True
+        else:
+            hotel_user = HotelUser.objects.filter(email=email).first()
+            is_vendor = False
 
-        if otp == hotel_user.otp:
+        if hotel_user and otp == hotel_user.otp:
             messages.success(request, "Login Success")
-            login(request , hotel_user)
-            return redirect('/accounts/login/')
+            login(request, hotel_user)
+            
+            if is_vendor:
+                return redirect('/accounts/add-hotel/')
+            return redirect('/')
 
         messages.warning(request, "Wrong OTP")
+        if login_type == 'vendor':
+            return redirect(f'/accounts/verify-otp/{email}/?type=vendor')
         return redirect(f'/accounts/verify-otp/{email}/')
 
-    return render(request , 'verify_otp.htmllogin')
+    return render(request , 'verify_otp.html')
 
 
 def login_vendor(request):
@@ -151,7 +183,7 @@ def login_vendor(request):
         if hotel_user:
             messages.success(request, "Login Success")
             login(request, hotel_user)
-            return redirect('/accounts/dashboard/')
+            return redirect('/accounts/add-hotel/')
         
         messages.warning(request, "Invalid Credentials")
         return redirect('/accounts/login-vendor/')
@@ -176,7 +208,7 @@ def register_vendor(request):
 
         if hotel_user.exists():
             messages.warning(request, "Account already exists")
-            return redirect('/accounts/registervendor')
+            return redirect('/accounts/register-vendor/')
         
 
 
@@ -206,8 +238,38 @@ def register_vendor(request):
 @login_required(login_url='/accounts/login-vendor/')
 def dashboard(request):
     vendor = HotelVendor.objects.get(id=request.user.id)
-    context = {'hotels': Hotel.objects.filter(hotel_owner=vendor)}
+    hotels = Hotel.objects.filter(hotel_owner=vendor)
+    
+    # Calculate Metrics
+    from django.db.models import Sum
+    
+    total_hotels = hotels.count()
+    bookings = HotelBooking.objects.filter(hotel__in=hotels)
+    total_bookings = bookings.count()
+    
+    revenue = bookings.aggregate(Sum('price'))['price__sum'] or 0
+    
+    context = {
+        'total_hotels': total_hotels,
+        'total_bookings': total_bookings,
+        'revenue': revenue,
+        'recent_bookings': bookings.order_by('-booking_start_date')[:5]
+    }
     return render(request, "vendor/vendor_dashboard.html", context)
+
+@login_required(login_url='/accounts/login-vendor/')
+def vendor_hotels(request):
+    vendor = HotelVendor.objects.get(id=request.user.id)
+    context = {'hotels': Hotel.objects.filter(hotel_owner=vendor)}
+    return render(request, "vendor/vendor_hotels.html", context)
+
+@login_required(login_url='/accounts/login-vendor/')
+def vendor_bookings(request):
+    vendor = HotelVendor.objects.get(id=request.user.id)
+    hotels = Hotel.objects.filter(hotel_owner=vendor)
+    bookings = HotelBooking.objects.filter(hotel__in=hotels).order_by('-booking_start_date')
+    context = {'bookings': bookings}
+    return render(request, "vendor/vendor_bookings.html", context)
 
 
 

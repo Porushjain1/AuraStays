@@ -1,32 +1,39 @@
 <!--navbar-->
-<nav class="navbar navbar-expand-lg navbar-dark bg-danger shadow-lg p-2 nav">
-  <div class="container-fluid">
+<nav class="navbar navbar-expand-lg navbar-light nav-glass sticky-top py-3">
+  <div class="container">
     <!-- Brand Logo -->
-    <a class="navbar-brand" href="/"> 
-      <img height="40" src="https://i.pinimg.com/736x/60/20/3c/60203c06b364a8764b54bba1a35290c2.jpg" alt="Logo">
+    <a class="navbar-brand d-flex align-items-center" href="/"> 
+      <i class="fa-solid fa-hotel text-danger me-2 fs-3"></i>
+      <span style="font-weight: 800; font-size: 1.5rem; letter-spacing: -0.5px;">Aura <span class="text-danger">Stays</span></span>
     </a>
   
     <!-- Toggler -->
-    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+    <button class="navbar-toggler border-0 shadow-none" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
       <span class="navbar-toggler-icon"></span>
     </button>
 
     <!-- Nav Items -->
     <div class="collapse navbar-collapse" id="navbarNav">
-      <ul class="navbar-nav me-auto">
-        <li class="nav-item">
+      <ul class="navbar-nav ms-auto align-items-center">
+        <li class="nav-item me-3">
           <a class="nav-link active" aria-current="page" href="/">Home</a>
         </li>
-        <li class="nav-item">
-          <a class="nav-link" href="{% url 'login_page' %}">Login</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="{% url 'register' %}">Register</a>
-        </li>
+        {% if request.user.is_authenticated %}
+          <li class="nav-item me-3">
+            <span class="nav-link"><i class="fa-regular fa-user"></i> {{ request.user.username }}</span>
+          </li>
+          <li class="nav-item">
+            <a class="btn btn-outline-danger rounded-pill px-4" href="{% url 'logout_view' %}">Logout</a>
+          </li>
+        {% else %}
+          <li class="nav-item me-2">
+            <a class="nav-link" href="{% url 'login_page' %}">Login</a>
+          </li>
+          <li class="nav-item">
+            <a class="btn btn-primary-custom" href="{% url 'register' %}">Sign Up</a>
+          </li>
+        {% endif %}
       </ul>
-
-      <!-- Logout button aligned to right -->
-      <a class="btn btn-light text-danger" href="{% url 'logout_view' %}">Logout</a>
     </div>
   </div>
 </nav>

@@ -2,48 +2,51 @@
 
 {% block start %}
 
-<div class="container mt-5 pt-5 pb-5">
-
-    <div class="col-6 mx-auto card shadow p-4" style="border:none">
-        <h2>Vendor Register</h2>
+<div class="auth-bg w-100 py-5">
+    <div class="auth-card mx-auto mt-4">
+        <h2 class="text-center fw-bold mb-4">Register as Vendor</h2>
         <form method="post">
             {% include "utils/alerts.html" %}
             {% csrf_token %}
-            <div class="mb-3">
-                <label for="exampleInputEmail1" class="form-label">First Name</label>
-                <input type="text" name="first_name" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp">
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="firstName" class="form-label">First Name</label>
+                    <input type="text" name="first_name" class="form-control" id="firstName" required>
+                </div>
+
+                <div class="col-md-6 mb-3">
+                    <label for="lastName" class="form-label">Last Name</label>
+                    <input type="text" name="last_name" class="form-control" id="lastName" required>
+                </div>
             </div>
 
             <div class="mb-3">
-                <label for="exampleInputEmail1" class="form-label">Last Name</label>
-                <input type="text" name="last_name" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp">
+                <label for="businessName" class="form-label">Business Name</label>
+                <input type="text" name="business_name" class="form-control" id="businessName" required>
             </div>
 
             <div class="mb-3">
-                <label for="exampleInputEmail1" class="form-label">Business Name</label>
-                <input type="text" name="business_name" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp">
+                <label for="emailInput" class="form-label">Email address</label>
+                <input type="email" name="email" class="form-control" id="emailInput" required>
             </div>
 
             <div class="mb-3">
-                <label for="exampleInputEmail1" class="form-label">Email address</label>
-                <input type="email" name="email" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp">
-                <div id="emailHelp" class="form-text">We'll never share your email with anyone else.</div>
+                <label for="phoneInput" class="form-label">Phone Number</label>
+                <input type="text" name="phone_number" class="form-control" id="phoneInput" required>
             </div>
 
-            <div class="mb-3">
-                <label for="exampleInputEmail1" class="form-label">Phone Number</label>
-                <input type="text" name="phone_number" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp">
+            <div class="mb-4">
+                <label for="passwordInput" class="form-label">Password</label>
+                <input type="password" name="password" class="form-control" id="passwordInput" required>
             </div>
 
-            <div class="mb-3">
-                <label for="exampleInputPassword1" class="form-label">Password</label>
-                <input type="password" name="password" class="form-control" id="exampleInputPassword1">
+            <button type="submit" class="btn btn-primary-custom w-100">Sign Up</button>
+            
+            <div class="text-center mt-4">
+                <p class="text-muted mb-0">Already a vendor? <a href="{% url 'login_vendor' %}" class="fw-bold text-danger">Login</a></p>
             </div>
-
-            <button type="submit" class="btn btn-primary">Submit</button>
         </form>
     </div>
-
-    </div>
+</div>
 
 {% endblock %}

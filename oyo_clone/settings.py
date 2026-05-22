@@ -128,9 +128,9 @@ import os
 
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR,'staticfiles')
-STATICFILES_DIR = {
+STATICFILES_DIRS = [
     os.path.join(BASE_DIR , "public/static")
-}
+]
 
 MEDIA_ROOT =  os.path.join(BASE_DIR, 'public/static') 
 MEDIA_URL = '/media/'
@@ -155,3 +155,10 @@ CSRF_TRUSTED_ORIGINS = [
     "http://127.0.0.1:8000",
     "http://localhost:8000",
 ]
+
+# Hack to fix macOS SSL Certificate Error for local SMTP email sending
+import ssl
+try:
+    ssl.create_default_context = ssl._create_unverified_context
+except AttributeError:
+    pass

@@ -1,0 +1,66 @@
+{% extends "utils/vendor_base.html" %}
+
+{% block start %}
+<div class="d-flex justify-content-between align-items-center mb-5">
+    <div>
+        <h2 class="fw-bold mb-1">Bookings Management</h2>
+        <p class="text-muted mb-0">View and manage all reservations across your properties.</p>
+    </div>
+</div>
+
+<div class="metric-card p-0 overflow-hidden">
+    <div class="table-responsive">
+        <table class="table table-hover mb-0 align-middle">
+            <thead class="table-light">
+                <tr>
+                    <th class="py-3 px-4 text-uppercase small fw-bold text-muted border-0">Guest</th>
+                    <th class="py-3 px-4 text-uppercase small fw-bold text-muted border-0">Property</th>
+                    <th class="py-3 px-4 text-uppercase small fw-bold text-muted border-0">Dates</th>
+                    <th class="py-3 px-4 text-uppercase small fw-bold text-muted border-0">Amount</th>
+                    <th class="py-3 px-4 text-uppercase small fw-bold text-muted border-0">Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for booking in bookings %}
+                <tr>
+                    <td class="px-4 py-3">
+                        <div class="d-flex align-items-center">
+                            <div class="bg-primary bg-opacity-10 text-primary rounded-circle d-flex justify-content-center align-items-center me-3 fw-bold" style="width: 40px; height: 40px;">
+                                {{ booking.booking_user.first_name|slice:":1" }}{{ booking.booking_user.last_name|slice:":1" }}
+                            </div>
+                            <div>
+                                <div class="fw-bold">{{ booking.booking_user.first_name }} {{ booking.booking_user.last_name }}</div>
+                                <div class="text-muted small">{{ booking.booking_user.email }}</div>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="px-4 py-3">
+                        <div class="fw-bold">{{ booking.hotel.hotel_name }}</div>
+                        <div class="text-muted small"><i class="fa-solid fa-location-dot me-1"></i>{{ booking.hotel.hotel_location }}</div>
+                    </td>
+                    <td class="px-4 py-3">
+                        <div class="fw-medium">{{ booking.booking_start_date|date:"M d, Y" }}</div>
+                        <div class="text-muted small">to {{ booking.booking_end_date|date:"M d, Y" }}</div>
+                    </td>
+                    <td class="px-4 py-3">
+                        <div class="fw-bold text-success">₹{{ booking.price }}</div>
+                        <div class="text-muted small">Paid</div>
+                    </td>
+                    <td class="px-4 py-3">
+                        <span class="badge bg-success bg-opacity-10 text-success rounded-pill px-3 py-2 border border-success border-opacity-25">Confirmed</span>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="5" class="text-center py-5">
+                        <i class="fa-solid fa-calendar-xmark fa-3x text-muted mb-3 opacity-25"></i>
+                        <h5 class="fw-bold">No bookings found</h5>
+                        <p class="text-muted mb-0">You don't have any reservations yet.</p>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
